@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../public/javascripts/jquery.min.js"></script>
+    <title>登陆</title>
+</head>
+
+<body>
+    <div class='loginBox'>
+        <form action="" method="POST" id="allow">
+            <h1>智慧水务管理系统</h1>
+            <div>
+                <span id="infoContent">UserName</span> <input type="text" placeholder="请输入用户名" class="tp" id="UID"
+                    autocomplete="off"><br />
+                <span id="infoContent">PassWord</span> <input type="password" placeholder="请输入密码" class="tp" id="PWD"
+                    autocomplete="off"><br />
+                <span id='infoBoxLogin' style="color: red;"></span><br>
+            </div>
+            <input type="button" value="登陆" class="btn">
+        </form>
+        <div class="footer" style="color: white;">
+            <p>Copyright © 2020.Company WellInTech All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+<script>
+    $(function () {
+        $('.btn').on('click', function () {
+            var UID = $('#UID').val();
+            var PWD = $('#PWD').val();
+            if (UID.length < 5) {
+                $('#infoBoxLogin').html('用户名非法！')
+                $('#UID').focus();
+            } else {
+                if (!PWD) {
+                    $('#infoBoxLogin').html('密码不能为空！')
+                    $('#PWD').focus();
+                } else {
+                    let forms = {
+                        'UID': UID,
+                        'PWD': PWD
+                    }
+                    console.log(forms)
+                }
+            }
+        })
+    })
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-image: url('../public/images/bg001.png');
+    }
+
+    @media screen and (min-width: 1001px) {
+        .loginBox {
+            margin-top: 3%;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        h1 {
+            color: red;
+            text-align: center;
+        }
+
+        form {
+            border: none;
+            width: 600px;
+            margin: 50px auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    @media screen and (max-width: 1000px) {
+        .loginBox {
+            margin-top: 3%;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        h1 {
+            color: #ddd;
+            text-align: center;
+        }
+
+        form {
+            border: none;
+            width: 80%;
+            margin: 50px auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    .tp {
+        width: calc(100% - 20px);
+        margin: 10px;
+        line-height: 32px;
+        border-radius: 30px;
+        border: none;
+        text-indent: 10px;
+        outline: none;
+        color: rgba(255, 255, 255, .8);
+        background-color: rgba(255, 255, 255, .25);
+        box-shadow: rgba(0, 0, 0, .2) 0 0 10px;
+        backdrop-filter: blur(10px);
+        font-family: microsoft yahei, sans-serif;
+    }
+
+    .tp:focus {
+        background-color: rgba(255, 255, 255, .3);
+    }
+
+    .btn {
+        border: 1px solid #ddd;
+        background-color: white;
+        border-radius: 15px;
+        padding: 4px 12px;
+        color: #46b5d1;
+        display: flex;
+        justify-content: center;
+        line-height: 28px;
+        border-radius: 30px;
+        border: none;
+        outline: none;
+        color: rgba(255, 255, 255, .8);
+        background-color: rgba(255, 255, 255, .25);
+        box-shadow: rgba(0, 0, 0, .2) 0 0 10px;
+        backdrop-filter: blur(10px);
+        font-family: microsoft yahei, sans-serif;
+    }
+
+    .footer {
+        margin: 20px;
+        padding: 0;
+        text-align: center;
+    }
+
+    p {
+        font-size: 10px;
+        display: block;
+        margin-block-start: 1em;
+        margin-block-end: 1em;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+    }
+
+    #infoContent {
+        text-indent: 10px;
+        color: white;
+        font-family: "Microsoft YaHei";
+    }
+</style>
+
+</html>

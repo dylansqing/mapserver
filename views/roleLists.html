@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <!-- <script src="../public/javascripts/jquery.min.js"></script> -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- <script src="../public/javascripts/axios.min.js"></script> -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <title>角色列表</title>
+</head>
+
+<body>
+  <div id="app">
+    <!-- <div v-for="item in model"></div> -->
+    <el-card class="box-card">
+      <div slot="header" class="clearfix">
+        <h1>角色列表</h1>
+        <el-button type="primary" @click="javascrtpt:window.location.href='http://39.99.213.143:8888/role/edit'">新建角色
+        </el-button>
+      </div>
+      <el-table :data="roleInfo" border stripe height="74vh">
+        <el-table-column prop="roleName" label="角色名称" sortable width="140px">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <p>角色名称: {{ scope.row.roleName }}</p>
+              <p>备注: {{ scope.row.tips }}</p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag type="success" size="medium">{{ scope.row.roleName }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column label="划分区域" width="200px">
+          <template slot-scope="scope">
+            <el-tag size="medium" v-for="addr in scope.row.location">{{ addr }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="公司信息">
+          <template slot-scope="scope">
+            <el-tag size="medium" v-for="item in scope.row.company">{{ item }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="站点信息">
+          <template slot-scope="scope">
+            <el-tag size="medium" v-for="equ in scope.row.device">{{ equ }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="可操作画面">
+          <template slot-scope="scope">
+            <el-tag size="medium" v-for="label in scope.row.pic">{{ label.label }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200px">
+          <template slot-scope="scope">
+            <el-button @click="modify(scope.row._id)" type="warning" size="small">编辑</el-button>
+            <el-button @click="remove(scope.row._id)" type="danger" size="small">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+</body>
+
+<script>
+  var vm = new Vue({
+    el: "#app",
+    data() {
+      return {
+        model: [],
+        area: new String(),
+        roleInfo: []
+      }
+    },
+    methods: {
+      fetch() {
+        axios.get('http://39.99.213.143:8888/api/role')
+          .then((res) => {
+            this.roleInfo = res.data
+            //console.table(this.roleInfo)
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+      },
+      modify(id) {
+        window.location.href = `http://39.99.213.143:8888/role/edit?${id}`
+      },
+      remove(id) {
+        this.$confirm('是否确认删除', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          var res = await axios.delete(`http://39.99.213.143:8888/api/role/${id}`)
+          if (res.statusText == 'OK') {
+            this.$message('删除成功');
+          }
+          this.fetch();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+      }
+    },
+    created() {
+      this.fetch();
+    },
+  });
+</script>
+
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../public/images/icon.png" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous">
+    </script>
+    <script src="../public/javascripts/ezuikit.js"></script>
+    <title>手机视频</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="videoArea">
+            <div id="videobox">
+                <video id="myPlayer" poster="" playsInline webkit-playsinline preload [autoplay]>
+                    <!-- <video id="myPlayer" poster="" muted preload:auto></video> -->
+                </video>
+            </div>
+        </div>
+        <div class="menuArea">
+            <button id='startPlay' type="button" class="btn btn-primary">开始播放</button>
+            <button id='stopPlay' type="button" class="btn btn-danger">停止播放</button>
+        </div>
+        <div class="toolArea">
+            <div class="jumbotron">
+                <h1 class="display-4">启蒙污水厂</h1>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#exampleModal">
+                    获取当前直播信息
+                </button>
+                <p class="lead">直播信息：</p>
+                <p id='infoArea'>等待初始化，请开始播放</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">视频信息</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>当前直播地址：</p>
+                    <p class="lead">"http://hls01open.ys7.com/openlive/8b185f50fe534f569b37057402e288f5.hd.m3u8"</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    $(document).ready(function () {
+        videoInit()
+    })
+
+    //$.ajax({
+    //    type:'GET',
+    //        
+    //})
+
+    function videoInit() {
+        document.getElementById('startPlay').addEventListener('click', () => {
+            console.log('开始');
+            $('#myPlayer').attr("src",
+                "http://hls01open.ys7.com/openlive/8b185f50fe534f569b37057402e288f5.hd.m3u8");
+            var player = new EZUIKit.EZUIPlayer('myPlayer');
+            player.on('log', log);
+
+            player.play();
+
+            $("#stopPlay").click(function () {
+                player.stop();
+            })
+        })
+    }
+
+    function log(str) {
+        var infoText = document.getElementById('infoArea');
+        infoText.innerText = (new Date()).Format('yyyy-MM-dd hh:mm:ss.S') +
+            " " + JSON.stringify(str)
+        console.log((new Date()).Format('yyyy-MM-dd hh:mm:ss.S') + " " + JSON.stringify(str))
+    }
+</script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        margin-top: 5%;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-gap: 20px;
+    }
+
+    .menuArea>button {
+        margin: 0px 10px;
+    }
+
+    #myPlayer {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+    }
+
+    #myPlayerflashId {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .menuArea {
+        display: flex;
+        justify-self: center;
+        align-items: center;
+    }
+</style>
+
+</html>

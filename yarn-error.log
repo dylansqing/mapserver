@@ -1,0 +1,63 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\Dylan\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add 风压Label.Text = (($System[E10_08_风压压力] !== null) ? $System[E10_08_风压压力].toFixed(2) : '？？？') +  KPa;
+
+PATH: 
+  C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\MongoDB\Server\4.2\bin;C:\Users\Dylan\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Bandizip\;C:\Users\Dylan\AppData\Roaming\npm;C:\Users\Dylan\AppData\Local\Programs\Microsoft VS Code\bin
+
+Yarn version: 
+  1.22.4
+
+Node version: 
+  12.13.1
+
+Platform: 
+  win32 x64
+
+Trace: 
+  TypeError [ERR_UNESCAPED_CHARACTERS]: Request path contains unescaped characters
+      at new ClientRequest (_http_client.js:139:13)
+      at Object.request (https.js:309:10)
+      at Request.module.exports.Request.start (C:\Users\Dylan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141310:32)
+      at Request.module.exports.Request.end (C:\Users\Dylan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:142069:10)
+      at end (C:\Users\Dylan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141123:14)
+      at Immediate._onImmediate (C:\Users\Dylan\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141137:7)
+      at processImmediate (internal/timers.js:439:21)
+
+npm manifest: 
+  {
+    "name": "mapserver",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+      "start": "nodemon ./bin/www"
+    },
+    "dependencies": {
+      "@alicloud/sms-sdk": "^1.1.6",
+      "bcrypt": "^4.0.1",
+      "body-parser": "^1.19.0",
+      "cookie-parser": "~1.4.4",
+      "cors": "^2.8.5",
+      "debug": "~2.6.9",
+      "ejs": "^2.6.2",
+      "express": "~4.16.1",
+      "express-formidable": "^1.2.0",
+      "express-swagger-generator": "^1.1.17",
+      "formidable": "^1.2.2",
+      "http-errors": "~1.6.3",
+      "layui-src": "^2.5.5",
+      "mongoose": "^5.9.10",
+      "morgan": "~1.9.1",
+      "multer": "^1.4.2",
+      "multiparty": "^4.2.1",
+      "mysql": "^2.17.1",
+      "nodemailer": "^6.4.3",
+      "nodemon": "^2.0.4",
+      "request": "^2.88.2"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

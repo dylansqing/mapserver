@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+  <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=dNkB9KryKayiE7zG7u8srTyM"></script>
+  <script src="http://api.map.baidu.com/library/GeoUtils/1.2/src/GeoUtils.js"></script>
+  <script src="http://api.map.baidu.com/library/InfoBox/1.2/src/InfoBox_min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <title>mapView</title>
+  <style>
+    :root {
+      --green: #37c4b1;
+      --cyan: #25aad8;
+      --blue: #4092e3;
+      --purple: #7d54c1;
+      --pink: #c776a3;
+      --orange: #ee8877;
+      --deep-purple: #281c4c;
+      --duration: 0.7s;
+      --ease: cubic-bezier(0.6, 0, 0.2, 1);
+      --transition: transform var(--duration) var(--ease);
+    }
+
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body,
+    #allMap {
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+    }
+
+    /*隐藏地图控件*/
+    .anchorBL,
+    .BMap_cpyCtrl {
+      display: none;
+    }
+
+    /*地图聚合样式*/
+    .bubble p {
+      text-align: center;
+      color: #fff;
+    }
+
+    .bubble .name {
+      margin-top: 25px;
+      font-size: 14px;
+    }
+
+    /*信息窗口样式*/
+    .infoArea {
+      font-size: 12px;
+      padding: 10px 10px 10px 0px;
+      /*background-image: linear-gradient(
+          to bottom,
+          var(--primary, blue),
+          var(--secondary, green)
+        );*/
+      background-color: RGBA(255, 255, 255, 0.9);
+      border-radius: 5px;
+      box-shadow: 0px 0px 5px #064acb;
+      font-family: "DFKai-SB";
+      font-weight: 500;
+      line-height: 18px;
+      transform: scale(1.05);
+      transition: 0.8s ease;
+      display: table;
+      color: rgba(0, 35, 122, 0.5);
+    }
+
+    .opt {
+      color: rgba(0, 35, 122, 0.5);
+      line-height: 28px;
+    }
+
+    .BMapLabel span {
+      height: auto;
+      text-align: center;
+    }
+
+    #bmlspan {
+      margin-left: 10px;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    svg {
+      top: 20px;
+      width: auto;
+      height: 20px;
+      padding-top: 5px;
+    }
+
+    .infoArea:hover {
+      transform: scale(1.2);
+    }
+
+    .infoArea p {
+      padding: 0px 0px;
+    }
+
+    .infoArea h1 {
+      padding: 0px 10px;
+      text-align: center;
+      justify-self: auto;
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    .infoArea .name {
+      font-weight: 700;
+      line-height: 1em;
+    }
+
+    .red {
+      color: red;
+    }
+
+    .param1 {
+      color: green;
+    }
+
+    .yellow {
+      color: yellow;
+    }
+
+    .infoBox .arrow {
+      position: absolute;
+      left: 10px;
+      bottom: -8px;
+      display: block;
+      border: 8px solid transparent;
+      border-left-color: #fff;
+      width: 0;
+      height: 0;
+      margin: 0 auto;
+      z-index: 1;
+      background-color: none;
+    }
+
+    table {
+      color: #ffffff;
+    }
+
+    .infoBox .arrow .arrow-i {
+      display: none;
+      border: 6px solid transparent;
+      border-top-color: #fff;
+      width: 0;
+      height: 0;
+      position: absolute;
+      top: -7px;
+      left: -6px;
+    }
+
+    .BMapLabel {
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .extendP {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+      padding-left: 1em;
+    }
+
+    #allmap {
+      float: left;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      font-family: "微软雅黑";
+    }
+
+    #toolbar {
+      position: fixed;
+      z-index: 99999;
+      width: 90%;
+      height: auto;
+      top: 10px;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0px 0px 4px #46b3e6;
+    }
+
+    #toolbar span {
+      color: rgba(0, 35, 122, 0.5);
+      font-weight: bold;
+    }
+
+    .selector {
+      margin: 10px;
+      display: inline-block;
+      width: 300px;
+      height: 30px;
+      position: relative;
+      vertical-align: middle;
+      background-color: #fff;
+      color: rgba(0, 35, 122, 0.5);
+      border: 2px solid rgba(0, 35, 122, 0.5);
+      border-radius: 5px;
+      text-shadow: none;
+      transition: box-shadow 0.25s ease;
+      z-index: 2;
+    }
+
+    .selector:hover {
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .selector select {
+      cursor: pointer;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      background: transparent;
+      background-image: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .selector select:focus {
+      outline: none;
+    }
+
+    .btn {
+      margin: 10px;
+      padding: 0;
+      display: inline-block;
+      vertical-align: middle;
+      width: 100px;
+      height: 30px;
+      border: 2px solid rgba(0, 35, 122, 0.5);
+      border-radius: 5px;
+      background: white;
+      color: #45818e;
+    }
+
+    .btn:hover {
+      background-color: RGBA(255, 255, 255, 0.8);
+    }
+
+    .titles {
+      display: inline-block;
+      color: white;
+      width: 50px;
+    }
+
+    .dataarea {
+      position: fixed;
+      padding: 10px;
+      margin: 10px;
+      color: black;
+      width: 270px;
+      height: auto;
+      z-index: 2;
+      display: block;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      transition: 0.8s ease;
+      box-shadow: 0px 0px 4px #46b3e6;
+    }
+
+    .zhzb-li-name {
+      font-weight: bolder;
+      color: rgba(0, 35, 122, 0.5);
+    }
+
+    .typeStyle {
+      font-size: 8px;
+    }
+
+    #darea1:hover {
+      box-shadow: 0px 0px 10px #43d8c9;
+    }
+
+    #darea2:hover {
+      box-shadow: 0px 0px 10px #d63447;
+    }
+
+    #darea1 {
+      top: 100px;
+      left: 10px;
+    }
+
+    #darea2 {
+      top: 100px;
+      right: 10px;
+    }
+
+    .dataarea>#deviceList li {
+      margin: 0px;
+      padding: 0px;
+      list-style: none;
+      overflow: hidden;
+      line-height: 30px;
+    }
+
+    .zhzb-li-num {
+      font-size: larger;
+      float: right;
+      color: #035aa6;
+    }
+
+    #areaName {
+      font-size: 15px;
+      font-weight: bold;
+    }
+  </style>
+
+  <style>
+    .el-carousel__item h3 {
+      color: #475669;
+      font-size: 18px;
+      opacity: 0.75;
+      line-height: 300px;
+      margin: 0;
+    }
+
+    .el-carousel__item:nth-child(2n) {
+      background-color: #99a9bf;
+    }
+
+    .el-carousel__item:nth-child(2n+1) {
+      background-color: #d3dce6;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="toolbar" draggable="false">
+      <div>
+        <input class="btn" type="button" value="刷新地图" id="button-addon1" />
+        <span class="titles">省份</span><select id="select00" class="selector"></select>
+        <span class="titles">区域</span><select id="select02" class="selector"></select>
+        <span class="titles">站点</span><select id="select01" class="selector"></select>
+        <input class="btn" type="button" value="查询" id="button-addon2" />
+      </div>
+    </div>
+
+    <div class="dataarea" id="darea1" @click="centerDialogVisible = !centerDialogVisible">
+      <!-- @mouseover="centerDialogVisible = true" @mouseout="centerDialogVisible = false" -->
+      <ul id="deviceList">
+        <li>
+          <span class="zhzb-li-name">设备总数<span class="typeStyle">（个）</span></span><span class="zhzb-li-num"
+            id="equCount">--</span>
+        </li>
+        <li>
+          <span class="zhzb-li-name">设备在线<span class="typeStyle">（个）</span></span><span class="zhzb-li-num"
+            id="equOnLine">--</span>
+        </li>
+        <li>
+          <span class="zhzb-li-name">设备离线<span class="typeStyle">（个）</span></span><span class="zhzb-li-num"
+            id="equOffLine">--</span>
+        </li>
+      </ul>
+
+      <el-carousel indicator-position="outside" height="605px">
+        <!-- style="height: auto;" -->
+        <el-carousel-item key="i1" style="overflow-y:scroll">
+          <el-card class="box-card">
+            <center style="background: transparent;color:#63b7af;">
+              <div>{{itemList[0]}}</div>
+            </center>
+            <!-- class="infinite-list"  style="overflow:auto"-->
+            <ul v-if="deviceInfoStatusOn" style="height: auto;" class="infinite-list">
+              <li v-for="col in deviceInfoStatusOn" class="infinite-list-item">
+                <el-divider content-position="left">
+                  {{col.deviceName}}</el-divider>
+                <div style="font-size: smaller;">{{col.deviceAddr}}</div>
+              </li>
+            </ul>
+          </el-card>
+        </el-carousel-item>
+        <el-carousel-item key="i2" style="overflow-y:scroll">
+          <el-card class="box-card">
+            <center style="background: transparent;color:#d63447">
+              <div>{{itemList[1]}}</div>
+            </center>
+            <!-- style="overflow:auto" -->
+            <ul class="infinite-list" v-if="deviceInfoStatusOff" class="infinite-list">
+              <li v-for="col in deviceInfoStatusOff" class="infinite-list-item">
+                <el-divider content-position="left">
+                  {{col.deviceName}}</el-divider>
+                <div style="font-size: smaller;">{{col.deviceAddr}}</div>
+              </li>
+            </ul>
+          </el-card>
+        </el-carousel-item>
+      </el-carousel>
+    </div>
+
+    <div class="dataarea" id="darea2">
+      <!-- height="200px" -->
+      <el-card class="box-card" v-if="(alarmInfo.length == 0)">
+        <center>
+          <h1 style="color: #f37121;">报警信息加载中</h1>
+        </center>
+      </el-card>
+      <el-carousel height="370px" direction="vertical" autoplay="true" v-if="alarmInfo">
+        <el-carousel-item v-for="(item,i) in alarmInfo" :key=`i`>
+          <ul>
+            <li v-for="(o,j) in item">
+              <el-card class="box-card">
+                <div style="line-height: 1rem;font-size:10px">
+                  <span>※</span> {{o.GroupName}} <span style="color: coral;">{{o.TagName.slice(7)}}</span> 于
+                  <span>{{o.AlarmTime}}</span>
+                  报警! 异常值为: <span
+                    style="color: coral;">{{(o.AlarmValue.length <= 2)?(o.AlarmValue):(o.AlarmValue.slice(0,-3))}}</span>
+                </div>
+              </el-card>
+            </li>
+          </ul>
+        </el-carousel-item>
+      </el-carousel>
+    </div>
+  </div>
+
+  <div id="allMap">
+    <!--地图-->
+  </div>
+</body>
+
+<script>
+  /*初始化按钮功能和加载下拉菜单数据
+1、通过请求数据库数据获取基本地图数据点数据
+*/
+  function initToolbar() {
+    $("#select00").empty();
+    $.ajax({
+      type: "GET",
+      url: "http://39.99.213.143:8888/request/fatherMarkers",
+      success: (result) => {
+        $("#select00").empty();
+        if (window.localStorage.locationInfoFromMG) {
+          $.each(result, (index, item) => {
+            if (window.localStorage.locationInfoFromMG.split(',').includes(item.fatherMarker)) {
+              $("#select00").append(
+                "<option class='opt' value='" +
+                item.fatherMarker +
+                "'>" +
+                item.fatherMarker +
+                "</option>"
+              );
+            }
+          });
+          $("#select00").get(0).selectedIndex = 0;
+          getAreaByName();
+          getDeviceStatus();
+        } else {
+          $("#select00").append(`<option class="opt">当前用户权限下无可查看数据</option>`)
+        }
+      },
+    });
+  }
+
+  function getAreaByName() {
+    $("#select02").empty();
+    $.ajax({
+      type: "GET",
+      url:
+        "http://39.99.213.143:8888/request/getAreaByName?addr=" +
+        $("#select00").find("option:selected").text(),
+      success: (result) => {
+        $.each(result, (index, item) => {
+          $("#select02").append(
+            "<option class='opt' value='" +
+            item.area +
+            "'>" +
+            item.area +
+            "</option>"
+          );
+        });
+        getMarkerByName();
+        $("#select02").get(0).selectedIndex = 0;
+      },
+    });
+  }
+
+  function getMarkerByName() {
+    $("#select01").empty();
+    $.ajax({
+      type: "GET",
+      url:
+        "http://39.99.213.143:8888/request/getMarkerByArea?area=" +
+        $("#select02").find("option:selected").text(),
+      success: (result) => {
+        if (window.localStorage.deviceInfoFromMG) {
+          $.each(result, (index, item) => {
+            if (window.localStorage.deviceInfoFromMG.split(',').includes(item.name)) {
+              $("#select01").append(
+                "<option class='opt' value='" +
+                item.name +
+                "'data-longitude = '" +
+                item.longitude +
+                "' data-latitude = '" +
+                item.latitude +
+                "'>" +
+                item.name +
+                "</option>"
+              );
+            }
+          });
+        } else {
+          $("#select01").append(`<option class="opt">当前用户权限下无可查看数据</option>`)
+        }
+      },
+    });
+  }
+
+  initToolbar();
+  const parent = document.querySelector("#select00");
+  parent.addEventListener("click", getMarkerByName);
+
+  /*  实现地图搜点功能主要是几个步骤：
+1、添加聚合点marker（利用接口返回数据用marker来显示相应的数量来模拟聚合效果）；
+2、根据鼠标悬停事件来显示隐藏行政区划边界线（百度地图Polygon方法）；
+3、点击marker或鼠标滚轮事件来扩大地图级别显示所有的点（addEventListener(event: String, handler: Function)）；
+4、通过拖拽地图根据视野来加载对应的点，提高加载点位性能（百度地图GeoUtils）；
+5、给具体的点位添加信息窗体事件。
+*/
+
+  window.map = initMap(); //初始化地图对象
+  window.lastInfoBox = null; //定义最近打开的地图信息窗体
+  window.pointArray = []; //行政区划点位集合
+  window.labelData = []; //存数点位数据
+  var clustereData = [];
+  var labelListData = [];
+  addMarker(); //添加聚合点
+
+  function initMap() {
+    var map = new BMap.Map("allMap", {
+      enableMapClick: false,
+      minZoom: 7,
+      maxZoom: 18,
+    });
+    map.setMapStyle({
+      features: ["road", "building", "water", "land"],
+      //style: "grayscale",
+      //style: "midnight",
+    });
+    var point = new BMap.Point(114.07, 30.67); //成都市中心点
+    map.centerAndZoom(point, 7);
+    map.enableScrollWheelZoom(true);
+    //监听地图级别缩放事件，当级别为9时默认加载集合点，扩大级别时显示详细点位数据
+    map.addEventListener("zoomend", function () {
+      var zoomLevel = map.getZoom(); //获取地图缩放级别
+      if (zoomLevel == 7) {
+        addMarker();
+      } else {
+        getAllLabel();
+
+        //当存储的数据有数时直接加载视野数据，否则请求接口数据
+        //if (labelData.length > 0) {
+        //    addViewLabel(labelData);
+        //    //map.clearOverlays();
+        //} else {
+        //    getAllLabel();
+        //}
+      }
+    });
+    return map;
+  }
+
+  //根据行政区划绘制聚合点位
+  function addMarker() {
+    map.clearOverlays();
+    //$("#select01").empty();
+    //申请数据
+    $.ajax({
+      type: "GET",
+      url: "http://39.99.213.143:8888/request/label",
+      success: (result) => {
+        clustereData = result;
+        $.each(clustereData, function (index, data) {
+          var point = new BMap.Point(data.longitude, data.latitude);
+          //自定义label样式
+          var tpl =
+            '<div class="bubble bubble-1" data-longitude="' +
+            data.longitude +
+            '"' +
+            ' data-latitude="' +
+            data.latitude +
+            '" data-id="' +
+            data.code +
+            '">' +
+            '<p class="name" id="areaName" title="' +
+            data.address +
+            '">' +
+            data.address +
+            "</p>" +
+            '<p>已有<span class="count" style="color:#fdd365;font-size:24px">' +
+            data.count +
+            "</span>个设备</p>" +
+            //'<p><span class="count"> 点击查看详情 </span></p>' +
+            "</div>";
+          var myLabel = new BMap.Label(tpl, {
+            position: point, //label 在此处添加点位位置信息
+            offset: new BMap.Size(-46, -46),
+          });
+          myLabel.setStyle({
+            width: "92px", //宽
+            height: "92px", //高度
+            border: "0", //边
+            background: "rgba(84,144,244,.9)", //背景颜色
+            borderRadius: "50%",
+            cursor: "pointer",
+          });
+          myLabel.setTitle(data.address);
+          map.addOverlay(myLabel); //添加点位
+          //$("#select01").append("<option class='opt' value='" + data.address + "'>" + data.address + "</option>");
+          // 当鼠标悬停在label上时显示行政区划边界
+          myLabel.addEventListener("mouseover", function () {
+            myLabel.setStyle({
+              background: "rgba(241,80,68,.9)",
+            }); //修改覆盖物背景颜色
+            var regionName = myLabel.getTitle();
+            getBoundary(regionName);
+          });
+          // 当鼠标离开时在删除边界折线数据
+          myLabel.addEventListener("mouseout", function () {
+            myLabel.setStyle({
+              background: "rgba(84,144,244,.9)",
+            }); //修改覆盖物背景颜色
+            if (window.ply) {
+              var polyPathArray = new Array();
+              window.ply.setPath(polyPathArray);
+              map.removeOverlay(ply); //清除折线数据
+            }
+          });
+          // 点击聚合点之后，图层放大，并将点击的中心设置为地图中心，然后获取点位数据
+          myLabel.addEventListener("click", function (theLabel) {
+            map.setZoom(11);
+            map.centerAndZoom(theLabel.target.z.position, map.getZoom());
+            //console.log(theLabel.target.z.position);
+            //getAllLabel(); //获取所有点位数据
+          });
+        });
+      },
+    });
+  }
+
+  //根据行政区划绘制边界
+  function getBoundary(regionName) {
+    var bdary = new BMap.Boundary();
+    bdary.get(regionName, function (rs) {
+      var count = rs.boundaries.length; //行政区域的点有多少个
+      if (count === 0) {
+        alert("未能获取当前输入行政区域" + regionName);
+        return;
+      }
+      for (var i = 0; i < count; i++) {
+        if (!window.ply) {
+          window.ply = new BMap.Polygon(rs.boundaries[i], {
+            strokeWeight: 2,
+            strokeColor: "rgb(66, 133, 244)",
+            fillColor: "rgba(53, 126, 244,0.1)",
+          }); //建立多边形覆盖物
+          map.addOverlay(ply); //添加覆盖物
+        } else {
+          window.ply.setPath(rs.boundaries[i]);
+          map.addOverlay(ply); //添加覆盖物
+        }
+        ply.enableMassClear();
+        pointArray = pointArray.concat(ply.getPath());
+      }
+    });
+  }
+
+  //绘制详细点位信息
+  function getAllLabel() {
+    map.clearOverlays();
+    //$("#select01").empty();
+    //申请点位数据
+    $.ajax({
+      type: "GET",
+      url: "http://39.99.213.143:8888/request/labeldata",
+      success: (result) => {
+        let labelListData = result;
+        $.each(labelListData, function (index, data) {
+          if (
+            window.localStorage.deviceInfoFromMG
+              .split(",")
+              .includes(data.name)
+          ) {
+            var htmlTable =
+              "<table class='tableStyle' ><tr class='name'><span id='bmlspan'>" +
+              data.name +
+              `</span><span class='extendP'><svg t="1587627185378" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2119" width="128" height="128"><path d="M764.26106 928.55768m-19.146264 0a19.146264 19.146264 0 1 0 38.292528 0 19.146264 19.146264 0 1 0-38.292528 0Z" fill="#5FB0E5" p-id="2120"></path><path d="M768.885063 750.82255a13.72751 13.72751 0 1 1-13.65526-13.72751 13.72751 13.72751 0 0 1 13.65526 13.72751zM261.689692 745.476046a14.450011 14.450011 0 1 1-14.450011-14.450011 14.450011 14.450011 0 0 1 14.450011 14.450011z" fill="#5FB0E5" p-id="2121"></path><path d="M49.852537 818.231849m-25.359769 0a25.359769 25.359769 0 1 0 50.719537 0 25.359769 25.359769 0 1 0-50.719537 0Z" fill="#5FB0E5" p-id="2122"></path><path d="M1005.720737 802.481338a33.524025 33.524025 0 1 1-33.451775-33.451775 33.451775 33.451775 0 0 1 33.451775 33.451775z" fill="#5FB0E5" p-id="2123"></path><path d="M288.927962 937.950187m-25.721019 0a25.721019 25.721019 0 1 0 51.442037 0 25.721019 25.721019 0 1 0-51.442037 0Z" fill="#5FB0E5" p-id="2124"></path><path d="M539.345142 395.87145m-60.109509 344.411958a349.618006 349.618006 0 1 0 120.219018-688.823916 349.618006 349.618006 0 1 0-120.219018 688.823916Z" fill="#D2E9F7" p-id="2125"></path><path d="M539.41776 395.8261m-169.899492 147.379295a224.914415 224.914415 0 1 0 339.798984-294.758591 224.914415 224.914415 0 1 0-339.798984 294.758591Z" fill="#5FB0E5" p-id="2126"></path><path d="M261.906442 212.848656l-28.900021-19.001764A370.859522 370.859522 0 0 1 344.632752 84.966062l18.351514 28.900021a337.624497 337.624497 0 0 0-101.077824 98.982573z" fill="#0686D8" p-id="2127"></path><path d="M321.657236 691.216256a367.463769 367.463769 0 0 1-127.449094-419.917307l32.512524 11.704508a330.471742 330.471742 0 0 0-19.652014 112.926833 333.939745 333.939745 0 0 0 135.107599 267.325196z" fill="#0686D8" p-id="2128"></path><path d="M745.909546 699.163762l-19.507514-28.900021a332.350243 332.350243 0 0 0-316.382982-580.601425L396.58054 57.800042a366.958019 366.958019 0 0 1 349.329006 641.29147z" fill="#0686D8" p-id="2129"></path><path d="M419.483807 469.047344h-57.149792V338.563748h50.575037a73.478304 73.478304 0 0 1 22.831017 3.179002 32.079023 32.079023 0 0 1 14.450011 8.597757 33.740775 33.740775 0 0 1 8.814506 22.758766 26.588019 26.588019 0 0 1-9.898257 22.758767 35.547026 35.547026 0 0 1-4.696254 3.251252l-4.624003 2.167502a34.246525 34.246525 0 0 1 19.290764 10.909758 30.634022 30.634022 0 0 1 7.225006 20.663515 35.113526 35.113526 0 0 1-9.320257 24.059268q-10.620758 12.138009-37.497778 12.138009z m-28.03302-77.668807h13.79976a47.468285 47.468285 0 0 0 18.062513-2.601002 10.982008 10.982008 0 0 0 5.852254-11.271009 11.704509 11.704509 0 0 0-5.418754-11.487758 42.555281 42.555281 0 0 0-18.279263-2.817752h-14.01651z m0 53.031538H411.825302a43.350032 43.350032 0 0 0 18.712763-3.106752 12.138009 12.138009 0 0 0 6.285755-12.138009 11.704509 11.704509 0 0 0-6.647005-11.921258 56.282791 56.282791 0 0 0-21.169265-2.890003h-17.556763zM525.474635 435.378819a25.648769 25.648769 0 0 0 39.087278 0 39.015029 39.015029 0 0 0 7.225006-24.781768v-72.250053h28.900021V411.825302A57.800042 57.800042 0 0 1 585.225429 455.175333a54.91004 54.91004 0 0 1-40.09878 15.244762A55.488041 55.488041 0 0 1 504.81112 455.175333a57.800042 57.800042 0 0 1-15.750512-43.350031V338.563748h28.900021v72.250053a38.653778 38.653778 0 0 0 7.514006 24.565018zM687.242503 469.047344h-28.900021v-51.514288l-45.373033-78.969308h31.573273l28.177521 48.552036L700.825513 338.563748h31.501023l-45.084033 78.969308z" fill="#FFFFFF" p-id="2130"></path><path d="M662.894236 590.716433a30.417272 30.417272 0 0 0-30.345023 30.634022v-32.151273a30.417272 30.417272 0 0 0-60.834544 0v-31.862274a30.417272 30.417272 0 1 0-60.762295 0V460.738587a30.417272 30.417272 0 1 0-60.762294 0v191.318141h-42.844282a20.591265 20.591265 0 0 0-20.591265 20.519015v135.324349a27.96077 27.96077 0 0 0 16.184012 25.287518l24.926268 11.487759a27.81627 27.81627 0 0 1 16.184012 25.287518v58.594793h202.300148v-66.108798a24.565018 24.565018 0 0 1 7.225006-17.484513l30.923022-30.272772a28.900021 28.900021 0 0 0 9.103507-20.808016V621.350455a30.489522 30.489522 0 0 0-30.706272-30.634022z" fill="#FFFFFF" p-id="2131"></path><path d="M466.157341 707.255768h-34.535525V460.738587a47.685035 47.685035 0 0 1 95.29782 0V662.532985h-34.535525V460.738587a13.14951 13.14951 0 1 0-26.22677 0z" fill="#0686D8" p-id="2132"></path><path d="M587.68193 609.212446h-34.535525v-51.875538a13.29401 13.29401 0 0 0-13.077259-13.149509 13.07726 13.07726 0 0 0-13.14951 13.149509v51.875538h-34.535525v-51.875538a47.685035 47.685035 0 1 1 95.297819 0z" fill="#0686D8" p-id="2133"></path><path d="M648.444225 662.532985H614.12545V589.199182a13.36626 13.36626 0 0 0-13.14951-13.14951 13.22176 13.22176 0 0 0-13.149509 13.14951V662.532985h-34.680026V589.199182a47.685035 47.685035 0 0 1 95.29782 0z" fill="#0686D8" p-id="2134"></path><path d="M662.243985 928.55768h-34.535525v-66.108798a41.905031 41.905031 0 0 1 12.571509-29.839272l30.923023-30.272772a11.849009 11.849009 0 0 0 3.540252-8.381006V621.350455a13.14951 13.14951 0 0 0-26.299019 0v28.900021H614.12545v-28.900021a47.685035 47.685035 0 1 1 95.29782 0v172.822127a46.529034 46.529034 0 0 1-14.016511 33.090524L664.700487 857.319128a6.791505 6.791505 0 0 0-2.167502 5.129754z" fill="#0686D8" p-id="2135"></path><path d="M460.016087 928.55768h-34.535525v-58.594793a10.548508 10.548508 0 0 0-6.141255-9.609257l-24.926268-11.487758a45.300783 45.300783 0 0 1-25.937769-40.96578V672.575743a37.859028 37.859028 0 0 1 37.859028-37.786778h42.844281v34.535525H406.045297a3.323502 3.323502 0 0 0-3.323502 3.251253v135.324349a10.548508 10.548508 0 0 0 6.141254 9.609257l24.637269 11.487758a45.300783 45.300783 0 0 1 26.226769 40.96578z" fill="#0686D8" p-id="2136"></path><path d="M415.871305 876.104142h258.582939v123.69209H415.871305z" fill="#5FB0E5" p-id="2137"></path><path d="M691.722007 999.796232h-34.535526v-106.424328H433.139067v106.424328h-34.535525v-140.959853h293.118465v140.959853z" fill="#0686D8" p-id="2138"></path></svg></span></tr>`;
+            htmlTable = htmlTable + "</table>";
+            if (data.status == null) {
+              data.status = 0
+            }
+            //var iconPicPath = "../public/images/icon0" + data.status + ".png";
+            var iconPicPath = "../../DevelopClient/ProjectDevelp/res/images/icon0" + data.status + ".png";
+            var myIcon = new BMap.Icon(iconPicPath, new BMap.Size(80, 80));
+            var point = new BMap.Point(data.longitude, data.latitude);
+            var marker = new BMap.Marker(point, {
+              icon: myIcon,
+            });
+            marker.setTitle(data.name);
+            map.addOverlay(marker); // 将标注添加到地图中
+
+            marker.addEventListener("click", function (e) {
+              console.log(e.currentTarget.z.title);
+              window.parent.postMessage(
+                {
+                  msg: e.currentTarget.z.title,
+                },
+                "*"
+              );
+              // console.log(e.currentTarget.z.title+e.point.lng+e.point.lat);
+            });
+
+            //$("#select01").append("<option class='opt' value='" + data.name + "'>" + data.name + "</option>");
+
+            var myLabel = new BMap.Label(htmlTable, {
+              position: point, //label 在此处添加点位位置信息
+              offset: new BMap.Size(30, 5),
+            });
+            myLabel.setStyle({
+              padding: "0px 10px 0px 5px",
+              margin: "0",
+              textAlign: "center",
+              display: "flex",
+              height: "30px", //高度
+              border: "none",
+              fontWeight: "bold",
+              fontFamily: "微软雅黑",
+              borderRadius: "15px",
+              boxShadow: "0px 0px 8px #28c3d4",
+              color: "black",
+              backgroundColor: "RGBA(255, 255, 255, 0.9)",
+              opacity: "0.8",
+            });
+            myLabel.setTitle(data.name);
+            labelData.push(myLabel);
+            marker.setLabel(myLabel);
+            //信息窗口模板
+            var tpl =
+              "<div class='infoBox' data-longitude='" +
+              data.longitude +
+              "' data-latitude='" +
+              data.latitude +
+              "' data-id='" +
+              data.code +
+              "'>" +
+              "<div class='infoArea'><h1><p class='name'>" +
+              data.name +
+              "</p></h1><p class='num'>累计流量:<span style='color:#F57C00;font-size:17px';font-weight:bold> " +
+              parseFloat(data.flowAll).toFixed(0) +
+              " </span>m3</p>" +
+              "<p class='num'>风压压力:<span style='color:#F57C00;font-size:17px';font-weight:bold> " +
+              parseFloat(data.windPressure).toFixed(0) +
+              "</span> kPa</p >" +
+              "<p class='num'>膜压负压力:<span style='color:#F57C00;font-size:17px';font-weight:bold> " +
+              parseFloat(data.membranePressure).toFixed(0) +
+              "</span> kPa</p >" +
+              "<p class='num'>出水流量:<span style='color:#F57C00;font-size:17px';font-weight:bold'> " +
+              parseFloat(data.flowOut).toFixed(2) +
+              " </span>m3/h</p>" +
+              "<p class='num'>运行状态:<span style='color:#F57C00;font-size:17px';font-weight:bold'> " +
+              (data.status == 1 ? "在线" : "离线") +
+              " </span>·</p>" +
+              "</p><p class='num'>处理量:<span class='para1'> " +
+              data.processingCapacity +
+              " </span>t/d</p>" +
+              "<p class='num'>设备地址:<span class='para1'> " +
+              data.address +
+              " </span>  </p>" +
+              "<p class='num'>所属公司:<span class='para1'> " +
+              data.company +
+              " </span>  </p>" +
+              "<p class='num'>联系人:<span class='para1'> " +
+              data.contacts +
+              " </span>  </p>" +
+              "<p class='num'>联系电话:<span class='para1'> " +
+              data.contactNumber +
+              " </span>  </p>" +
+              "</div></div>";
+            //"</div><i class='arrow'><i class='arrow-i'></i></i></div>";
+            var infoBox = new BMapLib.InfoBox(map, tpl, {
+              boxStyle: {
+                width: "480px",
+                minHeight: "100px",
+                marginBottom: "60px",
+                marginRight: "60px",
+                backgroundColor: "none",
+                color: "black",
+                opacity: "0.8",
+                borderRadius: "15px",
+              },
+              closeIconMargin: "15px 10px 4px 4px",
+              closeIconUrl: "http://api0.map.bdimg.com/images/panorama/close.png",
+              enableAutoPan: false,
+              offset: new BMap.Size(-50, 0),
+              align: INFOBOX_AT_TOP,
+            });
+
+            //infobox全部打开
+            //infoBox.open(point);
+
+            //鼠标点击时打开新标签并关闭上一个标签内容
+            //myLabel.addEventListener("mouseover", function () {
+            //    if (window.lastInfoBox) {
+            //        //判断上一个窗体是否存在，若存在则执行close
+            //        window.lastInfoBox.close();
+            //    }
+            //    window.lastInfoBox = infoBox;
+            //    infoBox.open(point);
+            //});
+            ////鼠标离开时关闭新标签
+            //myLabel.addEventListener("mouseout", function () {
+            //    if (window.lastInfoBox) {
+            //        //判断上一个窗体是否存在，若存在则执行close
+            //        window.lastInfoBox.close();
+            //    }
+            //    //window.lastInfoBox = infoBox;
+            //});
+
+            //鼠标点击时标签一直存在
+            myLabel.addEventListener("click", function () {
+              if (window.lastInfoBox) {
+                window.lastInfoBox.close();
+              }
+              infoBox.open(point);
+              window.lastInfoBox = infoBox;
+            });
+          }
+        });
+      },
+    });
+    addViewLabel(labelData); //加载可视范围点
+  }
+
+  //确定当前用户
+  function getDeviceStatus() {
+    $.ajax({
+      type: "GET",
+      url: "http://39.99.213.143:8888/request/getDeviceStatusCount",
+      dataType: 'JSON',
+      success: (res) => {
+        //console.log(res)
+        let counts = 0,
+          onLine = 0,
+          offLine = 0
+        res.forEach(item => {
+          if (window.localStorage.deviceInfoFromMG.split(',').includes(item.name)) {
+            counts++
+            if (item.status == '1') {
+              onLine++
+            } else {
+              offLine++
+            }
+          }
+        })
+        $("#equCount").text(counts);
+        $("#equOnLine").text(onLine);
+        $("#equOffLine").text(offLine);
+      },
+    });
+  }
+
+  //根据地图视野动态加载数据，当数据多时此方法用来提高地图加载性能
+  //由于此篇模拟点位数据较少，视野加载不明显，当数据多时可直观感觉
+  function addViewLabel(labels) {
+    map.clearOverlays();
+    for (var i = 0; i < labels.length; i++) {
+      var result = BMapLib.GeoUtils.isPointInRect(
+        labels[i].point,
+        map.getBounds()
+      );
+      if (result == true) {
+        map.addOverlay(labels[i]);
+      } else {
+        map.removeOverlay(labels[i]);
+      }
+    }
+  }
+
+  //功能区
+  //实现读取在显示点的名称实现搜寻定位
+  $(document).ready(function () {
+    $("#button-addon2").on("click", function () {
+      var keywords = $("#select01").val();
+      var longitude = $("#select01")
+        .find("option:selected")
+        .attr("data-longitude");
+      var latitude = $("#select01")
+        .find("option:selected")
+        .attr("data-latitude");
+      var point = new BMap.Point(longitude, latitude);
+      map.centerAndZoom(point, 15);
+    });
+  });
+
+  //实现重载地图
+  $(document).ready(function () {
+    $("#button-addon1").on("click", function () {
+      console.log(window.location.href);
+      window.location.reload();
+    });
+
+    $("#select00").change(function () {
+      //要触发的事件
+      getAreaByName();
+    });
+
+    $("#select02").change(function () {
+      //要触发的事件
+      getMarkerByName();
+    });
+  });
+
+  $(document).ready(function () {
+    $("#button-addon2").on("click", function () {
+      var keywords = $("#select01").val();
+      var allOverlay = map.getOverlays();
+      var stringCat = true;
+      for (var i = 0; i < allOverlay.length; i++) {
+        if (allOverlay[i].toString() === "[object Marker]") {
+          if (keywords === allOverlay[i].z.title) {
+            map.centerAndZoom(allOverlay[i].point, 12);
+            stringCat = false;
+          }
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      message: 'test',
+      centerDialogVisible: false,
+      itemList: ['在线设备', '离线设备'],
+      deviceInfoStatusOn: [],
+      deviceInfoStatusOff: [],
+      alarmInfo: []
+    },
+    methods: {
+      async fetch() {
+        let res = await axios.get(`http://39.99.213.143:8888/request/getDeviceStatusCount`)
+        res.data.forEach(item => {
+          let deviceObject = {
+            deviceName: item.name,
+            deviceAddr: item.address
+          }
+          if (window.localStorage.deviceInfoFromMG) {
+            if (window.localStorage.deviceInfoFromMG.split(',').includes(item.name)) {
+              if (item.status == '1') {
+                this.deviceInfoStatusOn.push(deviceObject)
+              } else {
+                this.deviceInfoStatusOff.push(deviceObject)
+              }
+            }
+          }
+        })
+      },
+      async fetchAlarmData() {
+        let res = await axios.get(`http://39.99.213.143:8888/request/alarmsByThatTime?device=${window.localStorage.deviceInfoFromMG}`)
+        //console.log(`http://39.99.213.143:8888/request/alarmsByThatTime?device=${window.localStorage.deviceInfoFromMG}`)
+        for (var i = 0, len = res.data.length; i < len; i += 5) {
+          this.alarmInfo.push(res.data.slice(i, i + 5));
+        }
+        this.alarmInfo.forEach(items => {
+          items.forEach(item => {
+            item.AlarmTime = utc2beijing(item.AlarmTime)
+            function utc2beijing(utc_datetime) {
+              // 转为正常的时间格式 年-月-日 时:分:秒
+              var T_pos = utc_datetime.indexOf('T');
+              var Z_pos = utc_datetime.indexOf('Z');
+              var year_month_day = utc_datetime.substr(0, T_pos);
+              var hour_minute_second = utc_datetime.substr(T_pos + 1, Z_pos - T_pos - 1);
+              var new_datetime = year_month_day + " " + hour_minute_second; // 2017-03-31 08:02:06
+
+              // 处理成为时间戳
+              timestamp = new Date(Date.parse(new_datetime));
+              timestamp = timestamp.getTime();
+              timestamp = timestamp / 1000;
+
+              // 增加8个小时，北京时间比utc时间多八个时区
+              var timestamp = timestamp + 16 * 60 * 60;
+
+              // 时间戳转为时间
+              var beijing_datetime = new Date(parseInt(timestamp) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+              return beijing_datetime; // 2017-03-31 16:02:06
+            }
+            //item.AlarmTime = (new Date(item.AlarmTime)).toLocaleString()
+          })
+        })
+      }
+    },
+    created() {
+      this.fetch()
+      this.fetchAlarmData()
+      console.log(this.alarmInfo)
+    }
+  })
+</script>
+
+</html>

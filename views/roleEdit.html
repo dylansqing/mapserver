@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <!-- <script src="../public/javascripts/jquery.min.js"></script> -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- <script src="../public/javascripts/axios.min.js"></script> -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <title>角色编辑</title>
+</head>
+
+<body>
+  <div id="app">
+    <!-- <div v-for="item in model"></div> -->
+    <el-card class="box-card" style="width: 40rem; margin:0 auto">
+      <div slot="header" class="clearfix">
+        <h1>角色{{(!urlProp?'新建':'修改')}}</h1>
+        <!-- <el-button @click="javascrtpt:console.log(roleInfo.types)">测试 </el-button> -->
+        <!-- <el-button @click="getCheckedNodes">通过 node 获取</el-button> -->
+        <!-- <el-button @click="setCheckedNodes">通过 node 设置</el-button> -->
+      </div>
+
+      <el-form :model="roleInfo" ref="roleInfo" label-width="100px">
+        <el-form-item label="角色名">
+          <el-input v-model="roleInfo.roleName" style="width: 20rem;margin:0 auto;"></el-input>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="roleInfo.tips" style="width: 20rem;"></el-input>
+        </el-form-item>
+
+        <el-form-item label="区域信息">
+          <el-select v-model="roleInfo.location" multiple filterable style="width: 20rem;">
+            <el-option v-for="(item,index) in addr" :label="item" :value="item" :key="index">
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="公司信息">
+          <el-select v-model="roleInfo.company" multiple filterable style="width: 20rem;">
+            <el-option v-for="(item,index) in company" :label="item" :value="item" :key="index">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="站点信息">
+          <el-select v-model="roleInfo.device" multiple filterable style="width: 20rem;">
+            <el-option v-for="(item,index) in device" :label="item" :value="item" :key="index">
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="界面选择">
+          <el-tree :data="pics" show-checkbox node-key="id" ref="tree" highlight-current>
+          </el-tree>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="confirm">{{(!urlProp?'新建':'修改')}}</el-button>
+          <el-button @click="javascrtpt:window.location.href='http://39.99.213.143:8888/role/list'">取消</el-button>
+        </el-form-item>
+      </el-form>
+
+    </el-card>
+</body>
+
+<script>
+  var vm = new Vue({
+    el: "#app",
+    data() {
+      return {
+        model: [],
+        urlProp: new String,
+        area: new String(),
+        roleInfo: {
+          roleName: '',
+          tips: '',
+          pic: [],
+          location: [],
+          company: [],
+          device: []
+        },
+        company: [],
+        addr: [],
+        device: [],
+        pics: [{
+          id: 1,
+          label: '驾驶舱',
+        }, {
+          id: 2,
+          label: 'GIS地图',
+        }, {
+          id: 3,
+          label: '工艺监控',
+          children: [{
+            id: 10,
+            label: '设备总览'
+          }, {
+            id: 11,
+            label: '实时报警'
+          }, {
+            id: 12,
+            label: '设备报表'
+          }, {
+            id: 13,
+            label: '趋势分析'
+          }, {
+            id: 14,
+            label: '视频监控'
+          }, {
+            id: 15,
+            label: '远程控制'
+          }]
+        }, {
+          id: 4,
+          label: '综合报表',
+        }, {
+          id: 5,
+          label: '趋势曲线',
+        }, {
+          id: 6,
+          label: '历史报警',
+        }, {
+          id: 7,
+          label: '设备管理',
+        }, {
+          id: 8,
+          label: '工单管理',
+        }, {
+          id: 9,
+          label: '系统管理',
+          children: [{
+            id: 16,
+            label: '地图管理'
+          }, {
+            id: 17,
+            label: '操作日志'
+          }]
+        }, {
+          id: 18,
+          label: '用户管理'
+        }],
+      }
+    },
+    methods: {
+      async confirm() {
+        this.roleInfo.pic = this.$refs.tree.getCheckedNodes(false, true);
+        if (!this.urlProp) {
+          if (this.roleInfo.roleName && this.roleInfo.location && this.roleInfo.company) {
+            var res = await axios.post('http://39.99.213.143:8888/api/role/create', this.roleInfo)
+            this.$message('新建成功！');
+          } else {
+            this.$message('请完整填写内容！');
+            return;
+          }
+        } else {
+          var res = await axios.put(`http://39.99.213.143:8888/api/role/${this.urlProp}`, this.roleInfo)
+          this.$message('修改成功！');
+        }
+        window.location.href = 'http://39.99.213.143:8888/role/list';
+      },
+      getId() {
+        var url = window.location.href;
+        var data = url.split('?')
+        if (data[1]) {
+          this.urlProp = data[1]
+        } else {
+          this.urlProp = null
+        }
+      },
+      fetch(id) {
+        axios.get(`http://39.99.213.143:8888/api/role/${id}`)
+          .then((res) => {
+            this.roleInfo = res.data
+            //console.log(this.roleInfo)
+            let treeData = new Array()
+            this.roleInfo.pic.forEach(item => {
+              if (!Object.keys(item).includes('children')) {
+                treeData.push(item)
+              }
+            })
+            this.setCheckedNodes(treeData);
+            //this.setCheckedNodes(this.roleInfo.pic);
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+      },
+      getCheckedNodes() {
+        console.log(this.$refs.tree.getCheckedNodes());
+      },
+      setCheckedNodes(pic) {
+        let picsContainer = [];
+        pic.forEach(item => {
+          picsContainer.push(item.id)
+        })
+        this.$refs.tree.setCheckedKeys(picsContainer);
+      },
+
+      /*
+      *@获取数据库中已存储的公司、区域、设备名称信息
+      */
+      async getCompanyName() {
+        let res = await axios.get(`http://39.99.213.143:8888/request/labeldata`)
+        let company = [];
+        let addr = [];
+        let device = [];
+        res.data.forEach((item) => {
+          company.push(item.company)
+          addr.push(item.fatherMarker)
+          device.push(item.name)
+        })
+        let hash = {};
+        let result = [];
+        for (let i = 0; i < company.length; i++) {
+          if (!hash[company[i]]) {
+            result.push(company[i]);
+            hash[company[i]] = true;
+          }
+        }
+        this.company = result
+        result = []
+        for (let i = 0; i < addr.length; i++) {
+          if (!hash[addr[i]]) {
+            result.push(addr[i]);
+            hash[addr[i]] = true;
+          }
+        }
+        this.addr = result
+        result = []
+        for (let i = 0; i < device.length; i++) {
+          if (!hash[device[i]]) {
+            result.push(device[i]);
+            hash[device[i]] = true;
+          }
+        }
+        this.device = result
+      }
+    },
+    created() {
+      this.getId()
+      this.urlProp && this.fetch(this.urlProp)
+      this.getCompanyName()
+    },
+  });
+</script>
+
+</html>
