@@ -1,0 +1,69 @@
+.arc {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border-top: 2px solid #ffea29;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  animation: rt 2s infinite linear;
+  
+}
+.arc::before {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border-top: 2px solid #8d29ff;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+  animation: rt 4s infinite linear reverse;
+  content: "";
+}
+.arc::after {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border-top: initial;
+  border-left: initial;
+  border-right: initial;
+  animation: cw 1s infinite;
+  content: "";
+  background: snow;
+}
+
+@keyframes rt {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes cw {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  75% {
+    width: 40px;
+    height: 40px;
+  }
+  100% {
+    width: 0;
+    height: 0;
+  }
+}
