@@ -39,10 +39,6 @@ app.use(function (req, res, next) {
   res.header("X-Powered-By", ' 3.2.1')
   if (req.url.indexOf('.') == -1) {
     let str = req.url.split('/')
-    console.log('--------------------------------------------')
-    console.log(req.url)
-    console.log(str)
-    console.log('--------------------------------------------')
     if (str[1] == 'request' || str[1] == 'video' || str[1] == 'sms' || str[1] == 'api') {
       res.header("Content-Type", 'application/json;charset=utf-8')
     }
@@ -55,12 +51,6 @@ app.use(function (req, res, next) {
     } else if (str === "css") {
       res.header("Content-Type", 'text/css;charset=utf8')
     }
-    // if (str === "html") {
-    //   res.header("Content-Type", 'text/html;charset=utf8')
-    // }
-    // if (str === "css") {
-    //   res.header("Content-Type", 'text/css;charset=utf8')
-    // }
   }
   next()
 });
