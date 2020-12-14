@@ -31,8 +31,8 @@ var setOptionMaintain = {
 }
 //-------------------------------------------------------------------------------------------------------------------------
 const SMSClient = require('@alicloud/sms-sdk')
-const accessKeyId = 'LTAIBbEYy05fK8Zb'
-const secretAccessKey = 'rQ7HpvyFhpnDZKlBN4djQj90EjukZt'
+const accessKeyId = 'LTAIB=>bEYy05fK8Zb'
+const secretAccessKey = 'rQ7Hpvy=>FhpnDZKlBN4djQj90EjukZt'
 
 const smsClient = new SMSClient({
     accessKeyId,
